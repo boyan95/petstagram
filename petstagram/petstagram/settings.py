@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os, sys
 from pathlib import Path
+from petstagram.utils import is_production
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from django.conf.urls.static import static
@@ -22,18 +23,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&w8kpi9_dbol31)l)j3m2-z%*si4m#@3bib25cfhjz69za*g4^'
+# 'django-insecure-&w8kpi9_dbol31)l)j3m2-z%*si4m#@3bib25cfhjz69za*g4^'
+SECRET_KEY = os.getenv('SECRET_KEY')
+print(SECRET_KEY)
 
+# SECRET_KEY = 'django-insecure-&w8kpi9_dbol31)l)j3m2-z%*si4m#@3bib25cfhjz69za*g4^'
 # This should be changed
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-print(DEBUG)
+APP_ENVIRONMENT = os.getenv('APP_ENVIRONMENT', 'Development')
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'petstagram-boyan.herokuapp.com',
-]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
+# print(ALLOWED_HOSTS) = [
+#     'localhost',
+#     '127.0.0.1',]
+
 
 # Application definition
 
@@ -91,33 +95,44 @@ WSGI_APPLICATION = 'petstagram.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-DATABASES = {
-    'default': {
+
+DEFAULT_DATABASE_CONFIG = {
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': BASE_DIR / 'db.sqlite3',
+}
+
+if is_production():
+    DEFAULT_DATABASE_CONFIG = {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'd9sdkdq2748omo',
-        'USER': 'tijhgxgkrxfbif',
-        'PASSWORD': 'b8f17da18038e8c10527cd81e097c14cc1e5b220ea678d06525777a9322902ff',
-        'HOST': 'ec2-52-48-159-67.eu-west-1.compute.amazonaws.com',
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_PASSWORD'),
+        'PORT': os.getenv('DB_PORT', '5432'),  # if no env variable DB_PORT, return '5432'
     }
+
+DATABASES = {
+    'default': DEFAULT_DATABASE_CONFIG,
 }
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+AUTH_PASSWORD_VALIDATORS = []
+if is_production():
+    AUTH_PASSWORD_VALIDATORS = [
+        {
+            'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        },
+        {
+            'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        },
+        {
+            'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        },
+        {
+            'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        },
+    ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
@@ -149,5 +164,22 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGGING_LEVEL = 'DEBUG'
+if is_production():
+    LOGGING_LEVEL = 'INFO'
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'level': LOGGING_LEVEL,
+        'class': 'logging.FileHandler',
+        'filters': [],
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': LOGGING_LEVEL,
+        },
+    },
+}
 
 AUTH_USER_MODEL = 'accounts.PetstagramUser'
