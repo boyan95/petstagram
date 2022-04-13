@@ -44,9 +44,8 @@ class ChangeUserPasswordView(auth_views.PasswordChangeView):
     template_name = 'accounts/change_password.html'
 
 
-
-
-
+class UserLogoutView(auth_views.LogoutView):
+    next_page = reverse_lazy('home')
 
 
 class ProfileView(views.DetailView):
@@ -72,8 +71,6 @@ class ProfileView(views.DetailView):
         })
 
         return context
-
-
 
 
 class CreateProfileView(views.CreateView):
