@@ -28,9 +28,10 @@ SECRET_KEY = 'django-insecure-&w8kpi9_dbol31)l)j3m2-z%*si4m#@3bib25cfhjz69za*g4^
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'localhost',
     '127.0.0.1',
-    'petstagram-boyan.herokuapp.com'
-    ]
+    'petstagram-boyan.herokuapp.com',
+]
 
 # Application definition
 
@@ -129,11 +130,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR, "statics",
-
-]
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
+STATICFILES_DIRS = BASE_DIR, "staticfiles",
 
 MEDIA_ROOT = BASE_DIR / 'media/'
 MEDIA_URL = '/media/'
